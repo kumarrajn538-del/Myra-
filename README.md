@@ -1,2 +1,8 @@
-# Myra-
-Myra - The Hunter's Assistant (AI with Solo Leveling personality)"
+
+# Myra AI Assistant
+
+## Setup Instructions
+1. **Clone the Repository:**
+   ```sh
+   git clone https://github.com/kumarrajn538-del/myra.git
+   cd myra
