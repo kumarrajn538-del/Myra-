@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYRA AI : NIRAJ INDUSTRIES</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #020814;
+            color: #32ffff;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #hudCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        .overlay {
+            position: absolute;
+            z-index: 10;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            pointer-events: none;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00f0ff;
+            text-shadow: 0 0 10px #00f0ff;
+        }
+
+        .sub-title {
+            font-size: 0.8rem;
+            color: #ff8c00;
+        }
+
+        .status-box {
+            position: absolute;
+            top: 35%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .myra-core {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 15px #00f0ff;
+        }
+
+        .myra-status {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: #00f0ff;
+            letter-spacing: 2px;
+        }
+
+        .controls-container {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+            background: rgba(2, 12, 30, 0.85);
+            padding: 15px;
+            border: 1px solid #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .image-preview {
+            max-height: 90px;
+            object-fit: contain;
+            display: none;
+            border: 1px solid #ff8c00;
+            margin: 0 auto;
+        }
+
+        .input-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: #001020;
+            border: 1px solid #00f0ff;
+            color: #fff;
+            padding: 10px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .btn {
+            background: #00f0ff;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #ff8c00;
+            color: #fff;
+        }
+
+        .file-label {
+            background: #003050;
+            color: #00f0ff;
+            border: 1px solid #00f0ff;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #00f0ff;
+            text-shadow: 0 0 8px #00f0ff;
+            border-bottom: 2px solid #00f0ff;
+            width: 220px;
+            margin: 0 auto;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="hudCanvas"></canvas>
+
+    <div class="overlay">
+        <div class="header">
+            <div>
+                <div class="title">NIRAJ .</div>
+                <div class="sub-title">MARK 85 ASSISTANT // ONLINE</div>
+            </div>
+            <div style="text-align: right;">
+                <div id="clock" style="font-size: 1.2rem; color: #00f0ff;">00:00:00</div>
+                <div class="sub-title">CORE SYSTEM: READY</div>
+            </div>
+        </div>
+
+        <div class="status-box">
+            <div class="myra-core">MYRA AI</div>
+            <div id="statusText" class="myra-status">AWAITING COMMAND...</div>
+        </div>
+
+        <div class="controls-container">
+            <img id="imgPreview" class="image-preview" alt="Preview">
+            
+            <label for="imageInput" class="file-label">📷 UPLOAD PHOTO</label>
+            <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="previewImage(event)">
+
+            <div class="input-box">
+                <input type="text" id="userInput" placeholder="Ask Myra something...">
+                <button class="btn" onclick="handleMic()">🎤</button>
+                <button class="btn" onclick="processQuery()">SEND</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            NIRAJ INDUSTRIES
+        </div>
+    </div>
+
+    <script>
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'hi-IN';
+            msg.rate = 1.0;
+            msg.pitch = 1.1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        const statusText = document.getElementById('statusText');
+        const userInput = document.getElementById('userInput');
+        let selectedImage = null;
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'hi-IN';
+            
+            recognition.onstart = () => {
+                statusText.innerText = "LISTENING TO BOSS...";
+            };
+
+            recognition.onresult = (event) => {
+                const command = event.results[0][0].transcript;
+                userInput.value = command;
+                statusText.innerText = "PROCESSING COMMAND...";
+                processQuery();
+            };
+
+            recognition.onerror = () => {
+                statusText.innerText = "COULD NOT HEAR YOU";
+            };
+        }
+
+        function handleMic() {
+            if (recognition) {
+                recognition.start();
+            } else {
+                alert("Voice command not supported on this browser.");
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedImage = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('imgPreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+                statusText.innerText = "PHOTO LOADED. ASK A QUESTION!";
+                speak("फोटो लोड हो गई है बॉस, अब बताइए क्या पूछना है?");
+            }
+        }
+
+        function processQuery() {
+            const text = userInput.value.trim();
+            if (!text && !selectedImage) return;
+
+            statusText.innerText = "ANALYZING DATA...";
+
+            setTimeout(() => {
+                let response = "";
+
+                if (selectedImage && text) {
+                    response = `बॉस, मैंने फोटो देख ली है और आपने पूछा है: "${text}". यह फोटो एनालिसिस मोड में है!`;
+                } else if (selectedImage) {
+                    response = "बॉस, फोटो अपलोड हो गई है! अब इसके बारे में सवाल पूछिए।";
+                } else if (text.toLowerCase().includes("kaun ho") || text.toLowerCase().includes("who are you")) {
+                    response = "मैं माइरा हूँ, बॉस नीरज की AI असिस्टेंट!";
+                } else {
+                    response = `बॉस, आपने कहा: "${text}". कमांड रिसीव हो गई है!`;
+                }
+
+                statusText.innerText = "RESPONSE READY";
+                speak(response);
+                userInput.value = "";
+            }, 1000);
+        }
+
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toTimeString().split(' ')[0];
+        }, 1000);
+
+        const canvas = document.getElementById('hudCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let angle = 0;
+        function drawHUD() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2 - 50;
+
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 110, angle, angle + Math.PI * 0.7);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ff8c00';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 90, -angle * 1.5, -angle * 1.5 + Math.PI * 0.5);
+            ctx.stroke();
+
+            angle += 0.02;
+            requestAnimationFrame(drawHUD);
+        }
+        drawHUD();
+    </script>
+</body>
+</html>
