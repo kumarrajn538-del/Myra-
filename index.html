@@ -417,7 +417,7 @@ if (!GEMINI_API_KEY) {
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        async function processQuery() {
+                async function processQuery() {
             const text = userInput.value.trim();
             if (!text && !currentImageBase64) return;
 
@@ -432,7 +432,8 @@ if (!GEMINI_API_KEY) {
             typingIndicator.style.display = 'block';
 
             try {
-                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                // 🟢 UPDATED: v1beta gemini-2.0-flash Model Link
+                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
                 let currentParts = [];
                 if (text) currentParts.push({ text: text });
@@ -448,7 +449,7 @@ if (!GEMINI_API_KEY) {
 
                 let fullPayload = {
                     contents: [
-                        { role: "user", parts: [{ text: "Instruction: You are Myra AI 2.0, boss Niraj's highly advanced system assistant. Answer dynamically and clearly without repeating generic status lines. Speak in Hindi/Hinglish." }] },
+                        { role: "user", parts: [{ text: "Instruction: You are Myra AI 2.0, boss Niraj's highly advanced system assistant. Speak in Hindi/Hinglish." }] },
                         ...chatHistory
                     ]
                 };
@@ -462,21 +463,23 @@ if (!GEMINI_API_KEY) {
                 const data = await response.json();
                 typingIndicator.style.display = 'none';
 
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
                     let aiReply = data.candidates[0].content.parts[0].text;
                     chatHistory.push({ role: "model", parts: [{ text: aiReply }] });
                     appendMessage('myra', aiReply);
                     speak(aiReply);
                 } else {
-                    appendMessage('myra', "Error: System response failed.");
+                    // Agar Error aaye to Console me check kar sakte ho
+                    console.error("API Response Error:", data);
+                    appendMessage('myra', "Error: System response failed. (Key check karo ya new generate karo)");
                 }
 
             } catch (error) {
-                console.error(error);
+                console.error("Fetch Error:", error);
                 typingIndicator.style.display = 'none';
-                appendMessage('myra', "API Error! Please check your Key.");
+                appendMessage('myra', "API Connection Error!");
             }
-        }
+                }
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
