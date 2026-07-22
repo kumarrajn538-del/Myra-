@@ -336,14 +336,13 @@
             // Add to Memory
             chatHistory.push({ role: "user", parts: [{ text: text }] });
 
-            try {
-                // 🟢 LATEST GEMINI 2.0 FLASH API
-                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+                        try {
+                // 🟢 STABLE MODEL: gemini-1.5-flash (Yeh 100% chalega)
+                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-                // 🟢 CORRECT PAYLOAD STRUCTURE
                 let fullPayload = {
                     system_instruction: {
-                        parts: [{ text: "You are Myra AI 2.0, boss Niraj's highly advanced system assistant. Speak in Hindi/Hinglish. Answer dynamically and clearly." }]
+                        parts: [{ text: "You are Myra AI 2.0, boss Niraj's highly advanced system assistant. Speak in Hindi/Hinglish." }]
                     },
                     contents: chatHistory
                 };
@@ -357,30 +356,34 @@
                 const data = await response.json();
                 typingIndicator.style.display = 'none';
 
+                // 🚨 ALERT SYSTEM (Agar Google ne block kiya to pop-up me batayega)
+                if (data.error) {
+                    alert("🚨 GOOGLE KA ERROR: " + data.error.message);
+                    appendMessage('myra', "Google API Error! Screen par pop-up dekho.");
+                    chatHistory.pop(); // Memory se fail message nikal do
+                    return;
+                }
+
                 if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
                     let aiReply = data.candidates[0].content.parts[0].text;
                     
-                    // Save response to memory
                     chatHistory.push({ role: "model", parts: [{ text: aiReply }] });
-                    
-                    // Keep memory limit to last 20 messages so storage doesn't get full
                     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
                     localStorage.setItem('MYRA_MEMORY', JSON.stringify(chatHistory));
 
                     appendMessage('myra', aiReply);
                     speak(aiReply);
                 } else {
-                    console.error("Error Details:", data);
-                    appendMessage('myra', "Error: System response failed. (Key check karo)");
-                    chatHistory.pop(); // Remove failed user message from memory
+                    appendMessage('myra', "Error: System response failed.");
+                    chatHistory.pop(); 
                 }
 
             } catch (error) {
-                console.error("Fetch Error:", error);
                 typingIndicator.style.display = 'none';
+                alert("🚨 NETWORK ERROR: " + error.message);
                 appendMessage('myra', "API Connection Error!");
                 chatHistory.pop();
-            }
+                        }
         }
 
         // Voice Mic
