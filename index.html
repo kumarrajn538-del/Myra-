@@ -300,11 +300,12 @@
             }
         };
 
-        function clearMemory() {
+                function clearMemory() {
             localStorage.removeItem('MYRA_MEMORY');
-            chatHistory = [];
-            chatBox.innerHTML = '<div class="msg-container myra"><div class="msg-bubble">मेमोरी क्लियर कर दी गई है बॉस!</div></div>';
-        }
+            localStorage.removeItem('MYRA_KEY'); // 🟢 Isse purani bekar Key delete ho jayegi
+            alert("System Reset! Purani Memory aur API Key saaf ho gayi hai.");
+            location.reload(); // 🟢 Page naye sire se khulega aur prompt aayega!
+                }
 
         function openChat() { homeScreen.style.display = 'none'; chatScreen.style.display = 'flex'; }
         function closeChat() { chatScreen.style.display = 'none'; homeScreen.style.display = 'flex'; }
