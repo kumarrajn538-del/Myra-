@@ -346,7 +346,15 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = "AQ.Ab8RN6JOevKXFbKBztgypKTtsMaioT5E09di8ehubBY9ZlLlLA"; 
+        // 🔒 SAFE SYSTEM FOR PUBLIC SITE
+let GEMINI_API_KEY = localStorage.getItem('MYRA_KEY');
+
+if (!GEMINI_API_KEY) {
+    GEMINI_API_KEY = prompt("ghop_ghop");
+    if (GEMINI_API_KEY) {
+        localStorage.setItem('MYRA_KEY', GEMINI_API_KEY);
+    }
+}
 
         const homeScreen = document.getElementById('homeScreen');
         const chatScreen = document.getElementById('chatScreen');
