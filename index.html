@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MYRA AI 2.0 : SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: transparent; 
+            color: #00f0ff;
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 🌌 GOJO BLUE FLAMES VIDEO BACKGROUND */
+        .bg-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 1;
+            filter: brightness(0.7) contrast(1.1);
+        }
+
+        /* Dark Transparent Glow Overlay */
+        .aura-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 2; 
+            pointer-events: none;
+        }
+
+        /* ================= 1. HOME SCREEN ================= */
+        #homeScreen {
+            position: absolute;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 50px 20px;
+            z-index: 10;
+        }
+
+        .header-box { text-align: center; }
+
+        .hero-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-shadow: 0 0 20px #00f0ff, 0 0 40px #0055ff;
+            letter-spacing: 4px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #00f0ff;
+            letter-spacing: 5px;
+            font-weight: bold;
+            margin-top: 5px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+        }
+
+        /* HUD Circle Box */
+        .hud-container {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #hudCanvas { position: absolute; }
+
+        .enter-btn {
+            background: rgba(0, 240, 255, 0.15);
+            border: 2px solid #00f0ff;
+            color: #00f0ff;
+            padding: 15px 45px;
+            font-size: 1.4rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+            transition: all 0.3s ease;
+            clip-path: polygon(12% 0, 100% 0, 88% 100%, 0% 100%);
+            backdrop-filter: blur(5px);
+        }
+        .enter-btn:hover {
+            background: #00f0ff;
+            color: #000;
+            box-shadow: 0 0 35px #00f0ff;
+            transform: scale(1.05);
+        }
+
+        /* ================= 2. CHAT SCREEN ================= */
+        #chatScreen {
+            position: absolute;
+            width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.4); 
+            backdrop-filter: blur(4px);
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            background: rgba(0, 20, 40, 0.7);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.4);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        .chat-header .title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: #fff;
+            text-shadow: 0 0 10px #00f0ff;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .msg-container { display: flex; width: 100%; }
+        .msg-container.user { justify-content: flex-end; }
+        .msg-container.myra { justify-content: flex-start; }
+
+        .msg-bubble {
+            max-width: 82%;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+            backdrop-filter: blur(8px);
+        }
+        .msg-container.user .msg-bubble {
+            background: rgba(0, 240, 255, 0.18);
+            border: 1px solid rgba(0, 240, 255, 0.6);
+            color: #fff;
+            border-bottom-right-radius: 0;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+        .msg-container.myra .msg-bubble {
+            background: rgba(0, 60, 180, 0.25);
+            border: 1px solid rgba(0, 140, 255, 0.6);
+            color: #e0f7fa;
+            border-bottom-left-radius: 0;
+            box-shadow: 0 0 15px rgba(0, 100, 255, 0.3);
+        }
+
+        .input-area {
+            padding: 15px;
+            background: rgba(0, 10, 25, 0.8);
+            border-top: 1px solid rgba(0, 240, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .input-controls { display: flex; gap: 10px; align-items: center; }
+
+        .action-btn {
+            background: rgba(0, 240, 255, 0.15);
+            color: #00f0ff;
+            border: 1px solid #00f0ff;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.3s;
+        }
+        .action-btn:hover { background: #00f0ff; color: #000; }
+
+        input[type="text"] {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 140, 255, 0.8);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            outline: none;
+        }
+        .send-btn {
+            background: #00f0ff;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px #00f0ff;
+        }
+
+        .typing-indicator {
+            display: none; color: #00f0ff; font-size: 0.95rem; padding: 5px 20px; font-style: italic;
+        }
+        
+        .clear-btn {
+            background: rgba(255, 0, 0, 0.2); border: 1px solid red; color: white;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.8rem;
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.5); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <video autoplay loop muted playsinline class="bg-video">
+        <source src="bg_video.mp4" type="video/mp4">
+    </video>
+    <div class="aura-overlay"></div>
+
+    <div id="homeScreen">
+        <div class="header-box">
+            <h1 class="hero-title">MYRA AI 2.0</h1>
+            <div class="hero-subtitle">SYSTEM // ONLINE</div>
+        </div>
+        <div class="hud-container">
+            <canvas id="hudCanvas" width="250" height="250"></canvas>
+        </div>
+        <button class="enter-btn" onclick="openChat()">INITIALIZE LINK</button>
+    </div>
+
+    <div id="chatScreen">
+        <div class="chat-header">
+            <div class="title">MYRA AI</div>
+            <button class="clear-btn" onclick="clearMemory()">CLEAR MEMORY</button>
+            <button class="action-btn" style="border-radius:6px; padding: 6px 14px; font-size:0.95rem; font-family:'Orbitron';" onclick="closeChat()">BACK</button>
+        </div>
+
+        <div id="chatBox" class="chat-box">
+            <div class="msg-container myra">
+                <div class="msg-bubble">सिस्टम चालू हो गया है बॉस। आदेश दीजिए!</div>
+            </div>
+        </div>
+
+        <div id="typingIndicator" class="typing-indicator">Myra is analyzing...</div>
+
+        <div class="input-area">
+            <div class="input-controls">
+                <button class="action-btn" onclick="handleMic()" title="Voice Command">🎤</button>
+                <input type="text" id="userInput" placeholder="Type command..." onkeypress="if(event.key === 'Enter') processQuery()">
+                <button class="send-btn" onclick="processQuery()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔒 1. SAFE API KEY SYSTEM
+        let GEMINI_API_KEY = localStorage.getItem('MYRA_KEY');
+        if (!GEMINI_API_KEY) {
+            GEMINI_API_KEY = prompt("Enter your new Gemini API Key:");
+            if (GEMINI_API_KEY) localStorage.setItem('MYRA_KEY', GEMINI_API_KEY);
+        }
+
+        const homeScreen = document.getElementById('homeScreen');
+        const chatScreen = document.getElementById('chatScreen');
+        const chatBox = document.getElementById('chatBox');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // 🧠 2. MEMORY SYSTEM (Loads past chats)
+        let chatHistory = JSON.parse(localStorage.getItem('MYRA_MEMORY')) || [];
+        
+        window.onload = () => {
+            if(chatHistory.length > 0) {
+                chatHistory.forEach(msg => {
+                    appendMessage(msg.role, msg.parts[0].text);
+                });
+            }
+        };
+
+        // 🔄 3. SUPER CLEAR MEMORY FUNCTION (Wipes Key + History + Reloads)
+        function clearMemory() {
+            localStorage.removeItem('MYRA_MEMORY');
+            localStorage.removeItem('MYRA_KEY');
+            alert("System Reset! Purani Memory aur API Key saaf ho gayi hai.");
+            location.reload(); 
+        }
+
+        function openChat() { homeScreen.style.display = 'none'; chatScreen.style.display = 'flex'; }
+        function closeChat() { chatScreen.style.display = 'none'; homeScreen.style.display = 'flex'; }
+
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = 'hi-IN'; msg.rate = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg-container ${sender}`;
+            msgDiv.innerHTML = `<div class="msg-bubble">${text}</div>`;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // ⚡ 4. CORE API FUNCTION (Gemini 2.0 Flash + Error Alerts)
+        async function processQuery() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            appendMessage('user', text);
+            userInput.value = "";
+            typingIndicator.style.display = 'block';
+
+            chatHistory.push({ role: "user", parts: [{ text: text }] });
+
+            try {
+                // 🟢 LATEST MODEL: gemini-2.0-flash
+                let url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+                // 🟢 CORRECT PAYLOAD STRUCTURE
+                let fullPayload = {
+                    system_instruction: {
+                        parts: [{ text: "You are Myra AI 2.0, boss Niraj's highly advanced system assistant. Speak in Hindi/Hinglish." }]
+                    },
+                    contents: chatHistory
+                };
+
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(fullPayload)
+                });
+
+                const data = await response.json();
+                typingIndicator.style.display = 'none';
+
+                // 🚨 ALERT SYSTEM: If Google blocks/fails
+                if (data.error) {
+                    alert("🚨 GOOGLE API ERROR: " + data.error.message);
+                    appendMessage('myra', "API Error! Screen par pop-up check karo.");
+                    chatHistory.pop(); 
+                    return;
+                }
+
+                if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
+                    let aiReply = data.candidates[0].content.parts[0].text;
+                    
+                    chatHistory.push({ role: "model", parts: [{ text: aiReply }] });
+                    // Keep memory limit to last 20 messages
+                    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+                    localStorage.setItem('MYRA_MEMORY', JSON.stringify(chatHistory));
+
+                    appendMessage('myra', aiReply);
+                    speak(aiReply);
+                } else {
+                    appendMessage('myra', "Error: System response failed.");
+                    chatHistory.pop(); 
+                }
+
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                alert("🚨 NETWORK ERROR: " + error.message);
+                appendMessage('myra', "API Connection Error!");
+                chatHistory.pop();
+            }
+        }
+
+        // 🎤 5. VOICE MIC
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'hi-IN';
+            recognition.onresult = (e) => {
+                userInput.value = e.results[0][0].transcript;
+                processQuery();
+            };
+            function handleMic() { recognition.start(); }
+        }
+
+        // ⭕ 6. ROTATING HUD RING
+        const canvas = document.getElementById('hudCanvas');
+        const ctx = canvas.getContext('2d');
+        let angle = 0;
+        function drawHUD() {
+            if(homeScreen.style.display === 'none') { requestAnimationFrame(drawHUD); return; }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2; const cy = canvas.height / 2;
+            
+            ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.arc(cx, cy, 90, angle, angle + Math.PI * 1.2); ctx.stroke();
+            
+            ctx.strokeStyle = '#ff8c00'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(cx, cy, 70, -angle, -angle + Math.PI * 0.8); ctx.stroke();
+            
+            angle += 0.03; requestAnimationFrame(drawHUD);
+        }
+        drawHUD();
+    </script>
+</body>
+</html>
